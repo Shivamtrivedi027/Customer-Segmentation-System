@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Segmentation System — Machine Learning Analytics</title>
+  <meta name="description" content="Understand customer behaviors using K-Means machine learning clustering on income and spending score.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar" role="banner">
+    <div class="nav-container">
+      <span class="nav-brand">Customer Segmentation System</span>
+      <nav class="nav-links" aria-label="Main Navigation">
+        <a href="#input-section" class="nav-link">Analyze</a>
+        <a href="#results-section" class="nav-link">Results</a>
+        <a href="#explanation-section" class="nav-link">How It Works</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- 1. Hero Section -->
+    <section class="hero-section" id="hero" aria-labelledby="hero-title">
+      <div class="container hero-content">
+        <p class="hero-eyebrow">Data-Driven Machine Learning</p>
+        <h1 id="hero-title" class="hero-title">Customer Segmentation System</h1>
+        <p class="hero-subtitle">Understand your customers using machine learning.</p>
+        <div class="hero-actions">
+          <a href="#input-section" class="btn btn-primary" id="hero-analyze-btn">Analyze Customers</a>
+          <button type="button" class="btn btn-secondary" id="hero-sample-btn">Run Sample Data</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Input Section -->
+    <section class="input-section" id="input-section" aria-labelledby="input-title">
+      <div class="container">
+        <div class="section-header">
+          <h2 id="input-title" class="section-title">Upload Customer Data</h2>
+          <p class="section-desc">Provide a CSV file containing CustomerID, Income, and SpendingScore, or test immediately with our pre-loaded sample dataset.</p>
+        </div>
+
+        <div class="card input-card">
+          <form id="upload-form" class="upload-form" novalidate>
+            <label for="csv-file-input" class="dropzone" id="dropzone" aria-label="Customer CSV file upload dropzone">
+              <input type="file" id="csv-file-input" name="file" accept=".csv,text/csv" class="file-input" aria-describedby="file-instructions">
+              <div class="dropzone-content">
+                <span class="dropzone-title" id="dropzone-text">Choose CSV file or drag and drop here</span>
+                <span class="dropzone-subtext" id="file-instructions">Supported format: CSV with Income and Spending Score</span>
+              </div>
+            </label>
+
+            <div class="selected-file-display" id="selected-file-display" aria-live="polite">
+              <span class="file-label">Selected:</span>
+              <span class="file-name" id="file-name-text">None</span>
+              <button type="button" class="btn-clear" id="btn-clear-file" aria-label="Clear selected file">Remove</button>
+            </div>
+
+            <!-- Error banner -->
+            <div class="status-banner error-banner" id="error-banner" role="alert" style="display: none;">
+              <span id="error-message">Error message text</span>
+            </div>
+
+            <!-- Form submission buttons -->
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="btn-submit">
+                <span class="btn-text">Run Segmentation</span>
+                <span class="btn-spinner" id="btn-spinner" aria-hidden="true" style="display: none;"></span>
+              </button>
+              <button type="button" class="btn btn-secondary" id="btn-use-sample">
+                Use Sample Dataset
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dynamic Loading Indicator -->
+    <section class="loading-section" id="loading-section" style="display: none;" aria-live="polite">
+      <div class="container">
+        <div class="card loading-card">
+          <div class="spinner"></div>
+          <p class="loading-title">Applying K-Means Clustering</p>
+          <p class="loading-subtitle">Preprocessing features, scaling dimensions, and calculating cluster centroids...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Container (Initially hidden until analysis completes) -->
+    <div id="results-wrapper" style="display: none;">
+
+      <!-- 3. Results Section -->
+      <section class="results-section" id="results-section" aria-labelledby="results-title">
+        <div class="container">
+          <div class="section-header">
+            <h2 id="results-title" class="section-title">Clustering Results</h2>
+            <p class="section-desc">Customers have been segmented into 3 distinct behavioral cohorts based on statistical distribution.</p>
+          </div>
+
+          <!-- Top-level metrics -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-label">Analyzed Customers</span>
+              <span class="metric-value" id="metric-total">0</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Clusters Identified</span>
+              <span class="metric-value" id="metric-k">3</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Algorithm</span>
+              <span class="metric-value-text">K-Means (Standardized)</span>
+            </div>
+          </div>
+
+          <!-- Cluster Summary Cards -->
+          <div class="cluster-cards-grid" id="cluster-cards-container">
+            <!-- Dynamically populated via script.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Visualization Section -->
+      <section class="visualization-section" id="visualization-section" aria-labelledby="viz-title">
+        <div class="container">
+          <div class="section-header">
+            <h2 id="viz-title" class="section-title">Cluster Visualization</h2>
+            <p class="section-desc">Two-dimensional scatter plot of Annual Income versus Spending Score. The "X" markers indicate calculated cluster centroids.</p>
+          </div>
+
+          <div class="card plot-card">
+            <div class="plot-frame">
+              <img id="cluster-plot-img" src="" alt="Customer Segmentation Scatter Plot showing 3 distinct clusters with centroids" class="plot-image">
+            </div>
+            <div class="plot-caption">
+              <span>Figure 1: Customer Segmentation Scatter Plot (K=3, StandardScaler, Matplotlib)</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Interpretation Section -->
+      <section class="interpretation-section" id="interpretation-section" aria-labelledby="interp-title">
+        <div class="container">
+          <div class="section-header">
+            <h2 id="interp-title" class="section-title">Segment Interpretation</h2>
+            <p class="section-desc">Actionable business characteristics and engagement strategies for each identified group.</p>
+          </div>
+
+          <div class="interpretation-grid">
+            <!-- Cluster 1 -->
+            <article class="card interp-card">
+              <div class="interp-header">
+                <span class="cluster-badge badge-blue">Cluster 1</span>
+                <h3 class="interp-name">High Spending Customers</h3>
+              </div>
+              <p class="interp-description">
+                Customers demonstrating the highest spending score. This cohort represents high engagement and strong propensity to purchase premium offerings.
+              </p>
+              <div class="interp-strategy">
+                <span class="strategy-label">Action Strategy</span>
+                <p class="strategy-text">Prioritize for loyalty rewards, exclusive product previews, VIP experiences, and personalized upselling campaigns.</p>
+              </div>
+            </article>
+
+            <!-- Cluster 2 -->
+            <article class="card interp-card">
+              <div class="interp-header">
+                <span class="cluster-badge badge-green">Cluster 2</span>
+                <h3 class="interp-name">Medium Customers</h3>
+              </div>
+              <p class="interp-description">
+                Customers exhibiting moderate income levels and steady, consistent spending habits. They form the predictable core of the customer base.
+              </p>
+              <div class="interp-strategy">
+                <span class="strategy-label">Action Strategy</span>
+                <p class="strategy-text">Maintain steady communication through newsletter highlights, seasonal promotions, and gentle category cross-selling.</p>
+              </div>
+            </article>
+
+            <!-- Cluster 3 -->
+            <article class="card interp-card">
+              <div class="interp-header">
+                <span class="cluster-badge badge-gray">Cluster 3</span>
+                <h3 class="interp-name">Low Activity Customers</h3>
+              </div>
+              <p class="interp-description">
+                Customers with low purchase frequency or conservative spending habits relative to their income capacity.
+              </p>
+              <div class="interp-strategy">
+                <span class="strategy-label">Action Strategy</span>
+                <p class="strategy-text">Deploy win-back campaigns, limited-time trial discounts, and targeted surveys to identify friction points and re-engage interest.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- 6. Explanation Section -->
+    <section class="explanation-section" id="explanation-section" aria-labelledby="explanation-title">
+      <div class="container">
+        <div class="section-header">
+          <h2 id="explanation-title" class="section-title">Technical Explanation</h2>
+          <p class="section-desc">Clear, beginner-friendly details explaining how the algorithm operates and how to present this system to judges.</p>
+        </div>
+
+        <div class="explanation-grid">
+          <!-- Item 1: Simple explanation of K-Means -->
+          <div class="card explanation-card">
+            <h3 class="explanation-card-title">1. What is K-Means Clustering?</h3>
+            <p class="explanation-card-text">
+              K-Means is an unsupervised machine learning algorithm that groups data points into K distinct clusters based on similarity. It works by initializing K center points (centroids), assigning each customer to the nearest centroid using Euclidean distance, and iteratively recalculating the centroid positions until they stabilize.
+            </p>
+          </div>
+
+          <!-- Item 2: How clustering works here -->
+          <div class="card explanation-card">
+            <h3 class="explanation-card-title">2. How It Works in This Project</h3>
+            <p class="explanation-card-text">
+              The pipeline takes customer Annual Income and Spending Score, applies standard scaling (StandardScaler) so both features carry equal mathematical weight, and fits a K-Means model with K=3. The backend calculates cluster centers, maps each customer to their respective segment, and generates an automated scatter plot visualization.
+            </p>
+          </div>
+
+          <!-- Item 3: 3-4 lines to explain project to judges -->
+          <div class="card explanation-card highlight-card">
+            <h3 class="explanation-card-title">3. Pitch to Judges (30-Second Summary)</h3>
+            <blockquote class="judge-pitch">
+              "We built a lightweight, end-to-end customer segmentation engine powered by Flask and scikit-learn. Businesses upload raw customer purchase data, and our K-Means model instantly groups customers into actionable behavioral tiers: High Spenders, Steady Regulars, and Low Activity accounts. This replaces gut-feeling marketing with automated, data-driven segmentation to optimize retention and maximize revenue."
+            </blockquote>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 7. Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container footer-content">
+      <div class="footer-left">
+        <p class="footer-copyright">Customer Segmentation System &copy; 2026. Hackathon Edition.</p>
+        <p class="footer-note">Designed with Apple product aesthetic simplicity. Powered by Flask and scikit-learn.</p>
+      </div>
+      <div class="footer-right">
+        <button type="button" class="footer-link-btn" id="privacy-link">Privacy Policy (Draft)</button>
+        <span class="footer-separator">|</span>
+        <button type="button" class="footer-link-btn" id="terms-link">Terms of Service (Draft)</button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal Dialog for Policy / Terms -->
+  <dialog id="policy-modal" class="modal" aria-labelledby="modal-title">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-title" class="modal-title">Document Title</h3>
+        <button type="button" class="modal-close" id="modal-close-btn" aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <!-- Content injected dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="modal-ok-btn">Close</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="script.js"></script>
+</body>
+</html>
